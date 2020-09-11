@@ -44,13 +44,13 @@ export default class Category extends Component {
         ];
     }
 
-    // 异步获取分类列表显示
-    getCategorys = async () => {
+    // 异步获取分类列表显示  parentId如果没有指定，根据状态中的parentId请求,如果指定就根据指定的请求
+    getCategorys = async (parentId) => {
         // 再发请求前显示loading
         this.setState({
             loading: true
         })
-        const { parentId } = this.state
+        parentId = parentId || this.state.parentId
         // 发异步ajax请求获取数据
 
         const result = await reqCategorys(parentId)
@@ -115,8 +115,37 @@ export default class Category extends Component {
     }
 
     // 添加分类
-    addCategory = () => {
+    addCategory = async () => {
         console.log('addCategory()')
+
+        this.form.validateFields(async (err, values) => {
+            if (!err) {
+                // 隐藏确认框
+                this.setState({
+                    showStatus: 0
+                })
+
+                // 收集数据并提交添加匪类请求
+                const { parentId, categoryName } = values
+                // 清除输入数据
+                this.form.resetFields()
+                const result = await reqAddCategory(categoryName, parentId)
+                // 添加的分类就是当前列表的分类
+                if (result.status === 0) {
+                    // 重新获取当前分类列表显示
+                    if (parentId === this.state.parentId) {
+                        this.getCategorys()
+                    } else if (parentId === '0') {  //在二级分类列表下添加一级分类项，重新获取一级分类列表，但不显示一级列表
+                        this.getCategorys('0')
+                    }
+
+                }
+            }
+        })
+
+
+
+
     }
 
     // 显示更新分类列表确认框
@@ -130,26 +159,31 @@ export default class Category extends Component {
     }
 
     // 更新分类
-    updateCategory = async () => {
+    updateCategory = () => {
         console.log('updateCategory()')
+        // 进行表单验证,
+        this.form.validateFields(async (err, values) => {
+            if (!err) {
+                // 隐藏确认框
+                this.setState({
+                    showStatus: 0
+                })
 
-        // 隐藏确认框
-        this.setState({
-            showStatus: 0
+                // 准备数据
+                const categoryId = this.category._id
+                const { categoryName } = values
+                // 清除输入数据
+                this.form.resetFields()
+
+                // 发请求更新分类
+                const result = await reqUpdateCategory({ categoryId, categoryName })
+                if (result.status == 0) {
+                    // 更新显示列表
+                    this.getCategorys()
+                }
+            }
         })
 
-        // 准备数据
-        const categoryId = this.category._id
-        const categoryName = this.form.getFieldValue('categoryName')
-        // 清除输入数据
-        this.form.resetFields()
-
-        // 发请求更新分类
-        const result = await reqUpdateCategory({ categoryId, categoryName })
-        if (result.status == 0) {
-            // 更新显示列表
-            this.getCategorys()
-        }
 
     }
 
@@ -197,7 +231,7 @@ export default class Category extends Component {
                     onOk={this.addCategory}
                     onCancel={this.handleCancel}
                 >
-                    <AddForm />
+                    <AddForm categorys={categorys} parentId={parentId} setForm={(form) => { this.form = form }} />
                 </Modal>
 
                 <Modal
@@ -206,7 +240,7 @@ export default class Category extends Component {
                     onOk={this.updateCategory}
                     onCancel={this.handleCancel}
                 >
-                    <UpdateForm categoryName={category.name} setForm={(form) => {this.form=form}} />
+                    <UpdateForm categoryName={category.name} setForm={(form) => { this.form = form }} />
                 </Modal>
             </Card>
         );

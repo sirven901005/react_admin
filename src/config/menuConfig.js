@@ -2,7 +2,8 @@ const menuList = [
     {
         title: '首页',
         key: '/home',
-        icon: 'home'
+        icon: 'home',
+        isPublic:true //公开的
     },
     {
         title: '商品',

@@ -12,23 +12,24 @@ import Role from '../role/role'
 import Bar from '../charts/bar'
 import Line from '../charts/line'
 import Pie from '../charts/pie'
+import {connect} from 'react-redux'
 
 import { Layout } from 'antd';
 
 const { Footer, Sider, Content } = Layout;
 
 // 管理的路由组件
-export default class Admin extends Component {
+class Admin extends Component {
 
     render() {
-        const user = memoryUtils.user
+        const user = this.props.user
         // 如果内存中没有存储user ==> 当前没有登录
         if (!user || !user._id) {
             // 在render中自动跳转到登录 
             return <Redirect to='/login' />
         }
         return (
-            <Layout style={{height: '100%'}}>
+            <Layout style={{minHeight: '100%'}}>
                 <Sider><LeftNav /></Sider>
                 <Layout>
                     <Header>header</Header>
@@ -52,3 +53,7 @@ export default class Admin extends Component {
     }
 }
 
+export default connect(
+   state=>({user:state.user}),
+    {}
+)(Admin)

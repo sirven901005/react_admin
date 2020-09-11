@@ -7,6 +7,8 @@ import { reqWeather } from '../../api'
 import { formateDate } from '../../utils/dataUtils'
 import memoryUtils from '../../utils/memoryUtils'
 import storageUtils from '../../utils/storageUtils'
+import {connect} from 'react-redux'
+import {logout} from '../../redux/actions'
 import './index.less'
 
 
@@ -41,7 +43,7 @@ class Header extends Component {
                 title = item.title
             } else if (item.children) {
                 // 在所有的子item中查找匹配的
-                const cItem = item.children.find(cItem => cItem.key === path)
+                const cItem = item.children.find(cItem => path.indexOf(cItem.key)===0)
                 //    如果有值说明有匹配的
                 if (cItem) {
                     //    取出他的title
@@ -59,11 +61,13 @@ class Header extends Component {
             title: '确定退出',
             onOk:() => {
             //   删除保存的user数据
-                storageUtils.removeUser()
-                memoryUtils.user = {}
+                // storageUtils.removeUser()
+                // memoryUtils.user = {}
+
+                this.props.logout()
 
             // 跳转到login页面
-                this.props.history.replace('/login')
+                // this.props.history.replace('/login')
             }
           })
     }
@@ -88,10 +92,11 @@ class Header extends Component {
     }
 
     render() {
+        // debugger
         const { currentTime, dayPictureUrl, weather } = this.state
-        const username = memoryUtils.user.username
+        const username = this.props.user.username
         // 得到当前需压迫显示的titlle
-        const title = this.getTitle()
+        let title = this.props.headTitle
         return (
             <div className='header'>
                 <div className='header-top'>
@@ -113,4 +118,7 @@ class Header extends Component {
     }
 }
 
-export default withRouter(Header)
+export default connect(
+    state=>({headTitle:state.headTitle,user:state.user}),
+    {logout}
+)(withRouter(Header)) 
