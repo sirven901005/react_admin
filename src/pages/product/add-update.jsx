@@ -161,10 +161,11 @@ class ProductAddUpdate extends Component {
       }
 
       componentWillMount(){
+        //   debugger
         //   取出携带的state
         const product = this.props.location.state
         // 保存是否是更新的标识
-        this.isUpdate = !!product._id
+        this.isUpdate = !!product
         // 保存商品(如果没有,保存是{})
         this.product = product || {}
       }

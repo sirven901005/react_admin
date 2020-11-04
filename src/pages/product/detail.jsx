@@ -21,7 +21,7 @@ export default class ProductDetail extends Component {
         // 得到当前商品的分类ID
         const {categoryId,pCategoryId} = this.props.location.state.product
         if(pCategoryId =='0'){ //一级分类下的商品
-          const result = await reqCategory(pCategoryId)
+          const result = await reqCategory(categoryId)
           const cName1 = result.data.name
           this.setState({
             cName1
